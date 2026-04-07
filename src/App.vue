@@ -63,12 +63,15 @@ onMounted(() => {
           :message="message"
         />
 
-        <!-- 打字指示器 -->
-        <TypingIndicator v-if="store.isStreaming" />
+        <!-- 打字指示器 - 只在没有消息且正在流式传输时显示 -->
+        <TypingIndicator v-if="store.isStreaming && store.messages.length === 0" />
       </main>
 
       <!-- 输入区域 -->
-      <ChatInput @send="handleSend" />
+      <ChatInput 
+        v-model="inputText"
+        @send="handleSend" 
+      />
     </div>
   </div>
 </template>

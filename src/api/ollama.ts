@@ -49,6 +49,12 @@ export async function* generateStreamResponse(
   })
 
   if (!response.ok) {
+    const errorText = await response.text()
+    console.error('Ollama API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText,
+    })
     throw new Error(`HTTP error! status: ${response.status}`)
   }
 
@@ -60,16 +66,18 @@ export async function* generateStreamResponse(
     if (done) break
 
     const chunk = new TextDecoder().decode(value)
+    console.log('Raw chunk:', chunk) // 调试用
     const lines = chunk.split('\n').filter(Boolean)
 
     for (const line of lines) {
       try {
         const json = JSON.parse(line)
+        console.log('Parsed JSON:', json) // 调试用
         if (json.response) {
           yield json.response
         }
       } catch (e) {
-        console.error('解析流数据失败:', e)
+        console.error('解析流数据失败:', e, 'line:', line)
       }
     }
   }

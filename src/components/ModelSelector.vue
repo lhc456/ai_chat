@@ -15,7 +15,7 @@ function handleModelChange(event: Event) {
     <select
       :value="store.currentModel"
       @change="handleModelChange"
-      class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white text-black font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
     >
       <option 
         v-for="model in store.models" 

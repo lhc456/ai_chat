@@ -1,17 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+
+const props = defineProps<{
+  modelValue?: string
+}>()
 
 const emit = defineEmits<{
+  'update:modelValue': [value: string]
   send: [text: string]
 }>()
 
-const inputValue = ref('')
+const inputValue = ref(props.modelValue || '')
 const isComposing = ref(false)
+
+// 监听外部变化（例如发送后清空）
+watch(() => props.modelValue, (newVal) => {
+  if (newVal !== undefined) {
+    inputValue.value = newVal
+  }
+})
 
 function handleSend() {
   if (isComposing.value || !inputValue.value.trim()) return
   
   emit('send', inputValue.value.trim())
+  // 发送后清空输入框，但不触发 update:modelValue（由父组件控制）
   inputValue.value = ''
 }
 
@@ -21,12 +34,18 @@ function handleKeydown(e: KeyboardEvent) {
     handleSend()
   }
 }
+
+function handleInput(event: Event) {
+  const target = event.target as HTMLTextAreaElement
+  emit('update:modelValue', target.value)
+}
 </script>
 
 <template>
   <div class="flex gap-2 p-4 bg-white border-t border-gray-200">
     <textarea
       v-model="inputValue"
+      @input="handleInput"
       @compositionstart="isComposing = true"
       @compositionend="isComposing = false"
       @keydown="handleKeydown"

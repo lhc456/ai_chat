@@ -41,24 +41,34 @@ export const useChatStore = defineStore('chat', () => {
     }
     messages.value.push(userMessage)
 
-    // 创建 AI 消息占位
-    const aiMessageId = (Date.now() + 1).toString()
-    const aiMessage: Message = {
-      id: aiMessageId,
-      role: 'assistant',
-      content: '',
-      timestamp: Date.now(),
-    }
-    messages.value.push(aiMessage)
-
     isLoading.value = true
     isStreaming.value = true
     error.value = null
 
     try {
+      let firstChunk = true
+      let aiMessageId = ''
+
       // 使用流式输出
       for await (const chunk of generateStreamResponse(content, currentModel.value)) {
-        aiMessage.content += chunk
+        if (firstChunk) {
+          // 收到第一个字符时创建 AI 消息
+          aiMessageId = (Date.now() + 1).toString()
+          const aiMessage: Message = {
+            id: aiMessageId,
+            role: 'assistant',
+            content: chunk,
+            timestamp: Date.now(),
+          }
+          messages.value.push(aiMessage)
+          firstChunk = false
+        } else {
+          // 找到刚创建的 AI 消息并追加内容
+          const aiMsgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+          if (aiMsgIndex !== -1) {
+            messages.value[aiMsgIndex].content += chunk
+          }
+        }
       }
 
       isStreaming.value = false
@@ -67,8 +77,7 @@ export const useChatStore = defineStore('chat', () => {
       error.value = e instanceof Error ? e.message : '发送消息失败'
       isLoading.value = false
       isStreaming.value = false
-      // 移除失败的 AI 消息
-      messages.value.pop()
+      console.error('Error:', e)
     }
   }
 
