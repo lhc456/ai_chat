@@ -2,16 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+/* ===== CSS Reset ===== */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* 移除列表默认样式 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* 移除标题默认 margin */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* 移除段落默认 margin */
+p {
+  margin: 0;
+}
+
+/* 移除表格默认样式 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 移除按钮默认样式 */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* 移除链接下划线 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 移除图片默认间距 */
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ===== 基础样式 ===== */
+html {
+  font-size: 16px; /* 1rem = 16px */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: #1f2937;
+  background-color: #ffffff;
 }
 
 #app {
@@ -19,9 +88,10 @@ body {
   height: 100vh;
 }
 
-/* 自定义滚动条样式 */
+/* ===== 自定义滚动条样式 ===== */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -32,8 +102,39 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 4px;
+  transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* ===== Loading 动画 ===== */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* ===== 加载旋转动画 ===== */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

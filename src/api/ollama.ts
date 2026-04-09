@@ -45,6 +45,8 @@ export async function* generateStreamResponse(
       model,
       prompt,
       stream: true,
+      // 添加系统提示，强制使用中文
+      system: '你是一个专业的AI助手。请始终使用中文（简体）回答所有问题。即使用户使用其他语言提问，也要用中文回答。',
     }),
   })
 

@@ -41,43 +41,54 @@ export const useChatStore = defineStore('chat', () => {
     }
     messages.value.push(userMessage)
 
+    // 创建一个空的 AI 消息用于显示 Loading
+    const aiMessageId = (Date.now() + 1).toString()
+    const aiMessage: Message = {
+      id: aiMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+    }
+    messages.value.push(aiMessage)
+
     isLoading.value = true
     isStreaming.value = true
     error.value = null
 
     try {
-      let firstChunk = true
-      let aiMessageId = ''
+      // 添加中文提示，强制 AI 使用中文回复
+      const promptWithLanguage = `${content}\n\n请用中文回答。`
+
+      console.log('开始发送请求到 Ollama...')
 
       // 使用流式输出
-      for await (const chunk of generateStreamResponse(content, currentModel.value)) {
-        if (firstChunk) {
-          // 收到第一个字符时创建 AI 消息
-          aiMessageId = (Date.now() + 1).toString()
-          const aiMessage: Message = {
-            id: aiMessageId,
-            role: 'assistant',
-            content: chunk,
-            timestamp: Date.now(),
-          }
-          messages.value.push(aiMessage)
-          firstChunk = false
+      for await (const chunk of generateStreamResponse(promptWithLanguage, currentModel.value)) {
+        console.log('收到数据块:', chunk)
+        
+        // 找到 AI 消息并追加内容
+        const aiMsgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+        if (aiMsgIndex !== -1) {
+          messages.value[aiMsgIndex].content += chunk
+          console.log('当前 AI 消息内容:', messages.value[aiMsgIndex].content)
         } else {
-          // 找到刚创建的 AI 消息并追加内容
-          const aiMsgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-          if (aiMsgIndex !== -1) {
-            messages.value[aiMsgIndex].content += chunk
-          }
+          console.error('找不到 AI 消息！')
         }
       }
 
+      console.log('AI 回复完成')
       isStreaming.value = false
       isLoading.value = false
     } catch (e) {
+      console.error('发送消息错误:', e)
       error.value = e instanceof Error ? e.message : '发送消息失败'
       isLoading.value = false
       isStreaming.value = false
-      console.error('Error:', e)
+      
+      // 如果 AI 消息仍然为空，移除它
+      const aiMsgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+      if (aiMsgIndex !== -1 && !messages.value[aiMsgIndex].content) {
+        messages.value.splice(aiMsgIndex, 1)
+      }
     }
   }
 

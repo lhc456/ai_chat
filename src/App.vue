@@ -60,8 +60,29 @@ onMounted(() => {
         <ChatMessage
           v-for="message in store.messages"
           :key="message.id"
+          v-show="message.content"
           :message="message"
         />
+
+        <!-- AI Loading 状态 - 在等待第一个字符时显示 -->
+        <div v-if="store.isLoading && store.messages.length > 0" class="flex gap-3 mb-4">
+          <!-- 只显示最后一条消息的 Loading -->
+          <template v-if="!store.messages[store.messages.length - 1]?.content">
+            <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+              <span class="text-white text-sm">🤖</span>
+            </div>
+            <div class="px-4 py-2 bg-gray-100 rounded-2xl rounded-bl-none">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                  <span class="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style="animation-delay: -0.3s;"></span>
+                  <span class="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style="animation-delay: -0.15s;"></span>
+                  <span class="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></span>
+                </div>
+                <span class="text-sm text-gray-500">AI 正在思考...</span>
+              </div>
+            </div>
+          </template>
+        </div>
 
         <!-- 打字指示器 - 只在没有消息且正在流式传输时显示 -->
         <TypingIndicator v-if="store.isStreaming && store.messages.length === 0" />
